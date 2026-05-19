@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Service untuk Laravel
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: silsilah_laravel_app
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=db
+    depends_on:
+      - db
+
+  # Service untuk Database PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: silsilah_postgres_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: silsilah_local
+      POSTGRES_USER: silsilah_dev
+      POSTGRES_PASSWORD: secret_password_123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
