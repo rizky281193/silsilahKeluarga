@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Member;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class MemberRepository
 {
@@ -14,9 +15,9 @@ class MemberRepository
     {
         return Member::whereNull('father_id')
             ->whereNull('mother_id')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('spouse_id')
-                      ->orWhere('gender', 'M');
+                    ->orWhere('gender', 'M');
             })
             ->with(['spouse'])
             ->get();
@@ -40,5 +41,23 @@ class MemberRepository
         return Member::where('mother_id', $motherId)
             ->with(['spouse'])
             ->get();
+    }
+
+    /**
+     * Mengosongkan seluruh data silsilah lama (Truncate)
+     * Digunakan jika admin ingin melakukan import ulang bersih dari nol
+     */
+    public function truncateMembersTable(): void
+    {
+        // Menggunakan DB statement untuk mengabaikan foreign key check sementara saat proses bersihkan data
+        DB::statement('TRUNCATE TABLE members RESTART IDENTITY CASCADE');
+    }
+
+    /**
+     * Memasukkan satu baris data member baru ke database
+     */
+    public function createMember(array $data): Member
+    {
+        return Member::create($data);
     }
 }
