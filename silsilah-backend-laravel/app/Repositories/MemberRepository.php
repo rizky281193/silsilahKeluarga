@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Models\Member;
+use App\Models\FamilyMember;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +13,7 @@ class MemberRepository
      */
     public function getRootLeluhur(): Collection
     {
-        return Member::whereNull('father_id')
+        return FamilyMember::whereNull('father_id')
             ->whereNull('mother_id')
             ->where(function ($query) {
                 $query->whereNull('spouse_id')
@@ -28,7 +28,7 @@ class MemberRepository
      */
     public function getChildrenByFather(int $fatherId): Collection
     {
-        return Member::where('father_id', $fatherId)
+        return FamilyMember::where('father_id', $fatherId)
             ->with(['spouse'])
             ->get();
     }
@@ -38,7 +38,7 @@ class MemberRepository
      */
     public function getChildrenByMother(int $motherId): Collection
     {
-        return Member::where('mother_id', $motherId)
+        return FamilyMember::where('mother_id', $motherId)
             ->with(['spouse'])
             ->get();
     }
@@ -56,8 +56,8 @@ class MemberRepository
     /**
      * Memasukkan satu baris data member baru ke database
      */
-    public function createMember(array $data): Member
+    public function createMember(array $data): FamilyMember
     {
-        return Member::create($data);
+        return FamilyMember::create($data);
     }
 }

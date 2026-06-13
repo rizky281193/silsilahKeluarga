@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Imports\MembersImport;
 use App\Repositories\MemberRepository;
-use App\Models\Member;
+use App\Models\FamilyMember;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
 use Exception;
@@ -38,7 +38,7 @@ class SilsilahService
     /**
      * Fungsi pemrosesan rekursif cabang anak-cucu
      */
-    private function formatNodeRekursif(Member $member): array
+    private function formatNodeRekursif(FamilyMember $member): array
     {
         // Ambil data anak dari repository berdasarkan gender subjek
         $children = $member->gender === 'M'

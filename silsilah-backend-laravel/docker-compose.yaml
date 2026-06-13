@@ -11,6 +11,9 @@ services:
       - .:/var/www/html
     environment:
       - DB_HOST=db
+      - LOG_CHANNEL=stack
+      - LOG_STACK=single,stderr
+      - LOG_LEVEL=debug
     depends_on:
       - db
 
