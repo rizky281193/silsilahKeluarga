@@ -1,13 +1,15 @@
 {
   "expo": {
-    "name": "silsilah-keluarga-app",
+    "name": "Silsilah Keluarga App",
     "slug": "silsilah-keluarga-app",
-    "version": "1.0.0",
+    "version": "2.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tanpajeda.banimoenandar",
+      "buildNumber": "2.1.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -15,13 +17,20 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.tanpajeda.banimoenandar",
+      "versionCode": 3
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ca1d92a3-11b6-42ed-80a8-e7e8dca7709e"
+      }
+    }
   }
 }
