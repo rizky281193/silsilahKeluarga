@@ -30,8 +30,8 @@ export async function getMembers() {
   }
 
   // SILAKAN LIHAT TERMINAL VS CODE ANDA UNTUK CARA MELIHAT LOG:
-  console.log('--- DATA ASLI DARI SUPABASE ---');
-  console.log(JSON.stringify(data, null, 2));
+  // console.log('--- DATA ASLI DARI SUPABASE ---');
+  // console.log(JSON.stringify(data, null, 2));
 
   return data ?? [];
 }

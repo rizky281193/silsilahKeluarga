@@ -4,7 +4,6 @@ import AppText from '../atoms/AppText';
 import { colors, radius, spacing } from '../../theme/tokens';
 
 export default function MemberCard({ member }) {
-  // Gabungkan semua nama pasangan jika ada
   const spouseNames = member.spouses && member.spouses.length > 0
     ? member.spouses.map(s => s.name).join(', ')
     : null;
@@ -12,20 +11,17 @@ export default function MemberCard({ member }) {
   return (
     <View style={[styles.card, member.gender === 'F' ? styles.borderFemale : styles.borderMale]}>
       <View style={styles.headerRow}>
-        {/* Nama Anggota Inti */}
         <AppText variant="bodyStrong" style={styles.mainName}>
           {member.name}
         </AppText>
         
-        {/* Badge Status Hidup/Wafat */}
         <View style={[styles.badge, member.is_alive ? styles.badgeAlive : styles.badgeDead]}>
-          <AppText variant="caption" style={styles.badgeText}>
+          <AppText variant="caption" style={[styles.badgeText, { color: member.is_alive ? colors.aliveText : colors.deadText }]}>
             {member.is_alive ? '🟢 Hidup' : '⚫ Wafat'}
           </AppText>
         </View>
       </View>
 
-      {/* RENDER PASANGAN (Mendukung Poligami) */}
       {spouseNames && (
         <View style={styles.spouseContainer}>
           <AppText variant="body" style={styles.spouseText}>
@@ -34,7 +30,6 @@ export default function MemberCard({ member }) {
         </View>
       )}
 
-      {/* Deskripsi / Biografi Pendek */}
       {member.biografi && (
         <AppText variant="subtitle" style={styles.biografi}>
           {member.biografi}
@@ -48,53 +43,54 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg, // Diperlebar agar membulat premium seperti kartu Beranda
     borderLeftWidth: 5,
     marginVertical: spacing.xs,
     marginHorizontal: spacing.sm,
-    // Efek bayangan halus (Shadow)
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowColor: colors.primaryDeep,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
     elevation: 2,
   },
-  borderMale: { borderLeftColor: '#007aff' },
-  borderFemale: { borderLeftColor: '#ff2d55' },
+  borderMale: { borderLeftColor: colors.male },
+  borderFemale: { borderLeftColor: colors.female },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'between',
+    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
   },
   mainName: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.textMain,
     flex: 1,
   },
   badge: {
     paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: radius.sm,
   },
-  badgeAlive: { backgroundColor: '#e5fbe5' },
-  badgeDead: { backgroundColor: '#ffe5e5' },
-  badgeText: { fontSize: 11 },
+  badgeAlive: { backgroundColor: colors.aliveBg },
+  badgeDead: { backgroundColor: colors.deadBg },
+  badgeText: { fontSize: 10, fontWeight: '700' },
   spouseContainer: {
     marginTop: spacing.xs,
-    backgroundColor: '#fafafa',
+    backgroundColor: colors.background,
     padding: spacing.xs,
-    borderRadius: radius.xs,
+    borderRadius: radius.sm,
   },
   spouseText: {
-    fontSize: 13,
-    color: '#48484a',
+    fontSize: 12,
+    color: '#555555',
   },
   spouseNamesText: {
-    color: '#1c1c1e',
+    color: colors.textMain,
   },
   biografi: {
     fontSize: 12,
-    color: '#8e8e93',
+    color: colors.textLight,
     marginTop: spacing.sm,
     fontStyle: 'italic',
   },

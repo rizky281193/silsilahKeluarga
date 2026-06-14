@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    backgroundColor: colors.background, // Selaraskan background halaman silsilah dengan warna biru es beranda!
   },
   searchContainer: {
     paddingHorizontal: spacing.sm,

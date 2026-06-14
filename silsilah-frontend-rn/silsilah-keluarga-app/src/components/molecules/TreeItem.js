@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import MemberCard from '../organisms/MemberCard';
 import AppText from '../atoms/AppText';
-import { spacing } from '../../theme/tokens';
+import { colors, spacing } from '../../theme/tokens';
 
 export default function TreeItem({ node, level = 0, searchQuery = '' }) {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   matchedHighlight: {
-    backgroundColor: '#fff9e6', // Memberi warna latar kuning lembut jika nama cocok dicari
+    backgroundColor: colors.highlight, // Menggunakan warna sorotan dari token global
   },
   row: {
     flexDirection: 'row',
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 14,
-    color: '#8e8e93',
+    color: colors.textLight,
   },
   spacer: {
     width: 30,
@@ -115,6 +115,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 20,
     width: 1,
-    backgroundColor: '#e5e5ea',
+    backgroundColor: colors.divider,
   },
 });
