@@ -1,23 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import MemberCard from '../organisms/MemberCard';
 import AppText from '../atoms/AppText';
 import { spacing } from '../../theme/tokens';
 
-export default function TreeItem({ node, level = 0 }) {
-  // State untuk mengontrol apakah anak-anak dari node ini sedang ditampilkan atau disembunyikan
+export default function TreeItem({ node, level = 0, searchQuery = '' }) {
   const [isExpanded, setIsExpanded] = useState(true);
   
   const hasChildren = node.children && node.children.length > 0;
-  const indentSize = level * spacing.md; // Menghitung jarak tab masuk ke dalam berdasarkan generasi
+  const indentSize = level * spacing.md;
+
+  // FUNGSI CERDAS: Jika ada query pencarian, cek apakah ada anak/cucu di bawahnya yang cocok
+  const hasMatchingChild = (item, query) => {
+    if (!query) return false;
+    if (!item.children) return false;
+    return item.children.some(child => 
+      child.name.toLowerCase().includes(query.toLowerCase()) || 
+      hasMatchingChild(child, query)
+    );
+  };
+
+  // Efek otomatis membuka tab jika keturunan di bawahnya cocok dengan teks pencarian
+  useEffect(() => {
+    if (searchQuery && hasMatchingChild(node, searchQuery)) {
+      setIsExpanded(true);
+    }
+  }, [searchQuery, node]);
+
+  // Cek apakah kartu ini sendiri cocok dengan pencarian (untuk efek highlight visual jika mau)
+  const isMatched = searchQuery && node.name.toLowerCase().includes(searchQuery.toLowerCase());
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isMatched && styles.matchedHighlight]}>
       
-      {/* BARIS UTAMA: Indentasi + Tombol Kontrol + Kartu Anggota */}
+      {/* BARIS UTAMA */}
       <View style={[styles.row, { paddingLeft: indentSize }]}>
         
-        {/* Tombol Expand/Collapse jika memiliki anak */}
         {hasChildren ? (
           <TouchableOpacity 
             onPress={() => setIsExpanded(!isExpanded)} 
@@ -29,25 +47,27 @@ export default function TreeItem({ node, level = 0 }) {
             </AppText>
           </TouchableOpacity>
         ) : (
-          // Spacer kosong jika tidak punya anak agar posisi kartu tetap sejajar
           <View style={styles.spacer} />
         )}
 
-        {/* Kartu Informasi Anggota Keluarga */}
         <View style={styles.cardContainer}>
           <MemberCard member={node} />
         </View>
         
       </View>
 
-      {/* REKURSIF JALUR DALAM: Jika dibuka dan punya anak, render anak-anaknya di bawahnya */}
+      {/* REKURSIF ANAK */}
       {hasChildren && isExpanded && (
         <View style={styles.childrenList}>
-          {/* Garis vertikal halus di sebelah kiri untuk menandakan satu payung keturunan */}
           <View style={[styles.guideLine, { left: indentSize + 22 }]} />
           
           {node.children.map((child) => (
-            <TreeItem key={child.id} node={child} level={level + 1} />
+            <TreeItem 
+              key={child.id} 
+              node={child} 
+              level={level + 1} 
+              searchQuery={searchQuery} // Teruskan kata kunci ke level bawah
+            />
           ))}
         </View>
       )}
@@ -59,6 +79,10 @@ export default function TreeItem({ node, level = 0 }) {
 const styles = StyleSheet.create({
   container: {
     width: '100%',
+    borderRadius: 8,
+  },
+  matchedHighlight: {
+    backgroundColor: '#fff9e6', // Memberi warna latar kuning lembut jika nama cocok dicari
   },
   row: {
     flexDirection: 'row',
@@ -86,7 +110,6 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
   },
-  // Garis pemandu silsilah vertikal ala Github/Filesystem tree
   guideLine: {
     position: 'absolute',
     top: 0,
