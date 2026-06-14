@@ -17,9 +17,12 @@ export async function getMembers() {
         gender,
         is_alive,
         biografi,
-        father:father_id(name),
-        mother:mother_id(name),
-        spouse:spouse_id(name)
+        father_id,
+        mother_id,
+        spouse_id,
+        father:father_id(id, name),
+        mother:mother_id(id, name),
+        spouse:spouse_id(id, name)
       `);
 
   if (error) {

@@ -1,39 +1,43 @@
 import React, { useEffect, useState } from 'react';
-import LoadingState from '../components/atoms/LoadingState';
-import MemberListSection from '../components/organisms/MemberListSection';
 import DefaultPageTemplate from '../components/templates/DefaultPageTemplate';
-import { getMembers } from '../services/memberService';
+import FamilyTreeTemplate from '../components/templates/FamilyTreeTemplate';
+import LoadingState from '../components/atoms/LoadingState';
+import { getMembers } from '../services/memberService.js';
+import { buildNestedTree } from '../utils/treeTransformer'; // <-- Panggil fungsi baru
 
 export default function MembersPage() {
-  const [members, setMembers] = useState([]);
+  const [treeData, setTreeData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const fetchMembers = async () => {
-    try {
-      setLoading(true);
-      setErrorMessage(null);
-      const data = await getMembers();
-      setMembers(data);
-    } catch (error) {
-      console.error('Error fetching data:', error.message);
-      setErrorMessage(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchMembers();
+    async function loadData() {
+      try {
+        setLoading(true);
+        setErrorMessage(null);
+        
+        const flatData = await getMembers();
+        
+        // Transformasi data menjadi nested structure untuk Collapsible List
+        const structuredTree = buildNestedTree(flatData);
+        setTreeData(structuredTree);
+      } catch (error) {
+        setErrorMessage(error.message || 'Gagal memuat silsilah keluarga.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadData();
   }, []);
 
   if (loading) {
-    return <LoadingState label="Memuat Silsilah Keluarga..." />;
+    return <LoadingState label="Menyusun silsilah keluarga..." />;
   }
 
   return (
-    <DefaultPageTemplate title="Daftar Anggota Keluarga" errorMessage={errorMessage}>
-      <MemberListSection members={members} />
+    <DefaultPageTemplate title="Bagan Silsilah Keluarga" errorMessage={errorMessage}>
+      <FamilyTreeTemplate treeData={treeData} />
     </DefaultPageTemplate>
   );
 }
