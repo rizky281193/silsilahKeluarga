@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------------------
+# DEPENDENCIES (Ribuan file library hasil 'npm install' - Wajib Masuk Sini)
+# ---------------------------------------------------------------------------
+node_modules/
+
+# ---------------------------------------------------------------------------
+# EXPO & EAS (Folder otomatis hasil kompilasi, build, dan rahasia EAS)
+# ---------------------------------------------------------------------------
+.expo/
+.eas/
+dist/
+web-build/
+
+# ---------------------------------------------------------------------------
+# LOCAL ENVIRONMENT VARIABLES (Kunci rahasia Supabase dkk)
+# ---------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+
+# ---------------------------------------------------------------------------
+# NATIVE BUILD DIRECTORIES (Muncul jika Anda melakukan prebuild/eject)
+# ---------------------------------------------------------------------------
+android/
+ios/
+
+# ---------------------------------------------------------------------------
+# METRO BUNDLER & CACHE (Sisa file temporary agar laptop tidak berat)
+# ---------------------------------------------------------------------------
+.metro/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# ---------------------------------------------------------------------------
+# OPERATING SYSTEM WASTES (File sampah otomatis bawaan Windows / Mac)
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
