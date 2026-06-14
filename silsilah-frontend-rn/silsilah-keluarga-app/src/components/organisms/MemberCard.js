@@ -3,13 +3,14 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import AppText from '../atoms/AppText';
 import { colors, radius, spacing } from '../../theme/tokens';
 
-export default function MemberCard({ member, onPress }) {
+export default function MemberCard({ member, onPress, level = 0 }) {
   const spouseNames = member.spouses && member.spouses.length > 0
     ? member.spouses.map(s => s.name).join(', ')
     : null;
 
+  const generationLabel = level === 0 ? "Leluhur" : `Generasi ${level}`;
+
   return (
-    // PERBAIKAN: Membungkus kartu dengan TouchableOpacity agar bisa diklik secara interaktif
     <TouchableOpacity 
       activeOpacity={0.7}
       onPress={() => onPress && onPress(member)}
@@ -20,10 +21,9 @@ export default function MemberCard({ member, onPress }) {
           {member.name}
         </AppText>
         
-        <View style={[styles.badge, member.is_alive ? styles.badgeAlive : styles.badgeDead]}>
-          <AppText variant="caption" style={[styles.badgeText, { color: member.is_alive ? colors.aliveText : colors.deadText }]}>
-            {member.is_alive ? '🟢 Hidup' : '⚫ Wafat'}
-          </AppText>
+        {/* BADGE GENERASI */}
+        <View style={styles.genBadge}>
+          <AppText style={styles.genText}>{generationLabel}</AppText>
         </View>
       </View>
 
@@ -35,8 +35,13 @@ export default function MemberCard({ member, onPress }) {
         </View>
       )}
 
-      {/* Catatan kecil indikator klip di pojok bawah kartu */}
+      {/* FOOTER ROW YANG SUDAH DISATUKAN (BADGE STATUS + INFO DETAIL) */}
       <View style={styles.footerRow}>
+        <View style={[styles.badge, member.is_alive ? styles.badgeAlive : styles.badgeDead]}>
+          <AppText variant="caption" style={[styles.badgeText, { color: member.is_alive ? colors.aliveText : colors.deadText }]}>
+            {member.is_alive ? '🟢 Hidup' : '⚫ Wafat'}
+          </AppText>
+        </View>
         <AppText variant="caption" style={styles.hintText}>ℹ️ Ketuk untuk detail biografi</AppText>
       </View>
     </TouchableOpacity>
@@ -92,16 +97,30 @@ const styles = StyleSheet.create({
   spouseNamesText: {
     color: colors.textMain,
   },
-  footerRow: {
-    marginTop: spacing.sm,
-    alignItems: 'flex-end',
-    borderTopWidth: 1,
-    borderTopColor: '#f5f5f5',
-    paddingTop: 4,
-  },
   hintText: {
     fontSize: 10,
     color: '#bcbcbf',
     fontStyle: 'italic',
-  }
+  },
+  genBadge: {
+    backgroundColor: '#f2f2f7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  genText: {
+    fontSize: 10,
+    color: '#8e8e93',
+    fontWeight: '700',
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f5',
+    paddingTop: 6,
+  },
 });

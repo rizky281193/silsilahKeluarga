@@ -24,6 +24,8 @@ export const colors = {
   deadBg: '#f5f5f5',      // Latar belakang badge wafat
   deadText: '#595959',    // Teks badge wafat
   highlight: '#fffb8f',   // Sorotan kuning lembut untuk hasil search yang ketemu
+  genBadge: '#f0f0f5',    // Latar belakang badge generasi
+  genText: '#636366',      // Teks badge generasi
 };
 
 export const spacing = {

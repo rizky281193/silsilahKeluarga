@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, ScrollView, Image } from 'react-native';
 import MemberCard from '../organisms/MemberCard';
 import AppText from '../atoms/AppText';
 import { colors, spacing, radius } from '../../theme/tokens';
 import { X, BookOpen, ShieldAlert } from 'lucide-react-native';
 
-export default function TreeItem({ node, level = 0, searchQuery = '' }) {
-  // KUNCI PERBAIKAN: Gunakan kembali state internal mandiri untuk mengontrol buka-tutup cabang
+export default function TreeItem({ node, level = 0, searchQuery = '', expandTrigger }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -24,6 +23,14 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
     );
   };
 
+  // 1. SYNC DENGAN TOMBOL BUKA/TUTUP SEMUA
+  useEffect(() => {
+    if (expandTrigger !== null) {
+      setIsExpanded(expandTrigger);
+    }
+  }, [expandTrigger]);
+
+  // 2. AUTO-EXPAND JIKA SEDANG SEARCH (Sudah bersih dari duplikasi)
   useEffect(() => {
     if (searchQuery && hasMatchingChild(node, searchQuery)) {
       setIsExpanded(true);
@@ -40,10 +47,10 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
   return (
     <View style={styles.container}>
       {/* BARIS UTAMA */}
-      <View style={[styles.row, { paddingLeft: indentSize }]}>
+      <View style={[styles.row, { paddingLeft: level * spacing.md }]}>
         {hasChildren ? (
           <TouchableOpacity 
-            onPress={() => setIsExpanded(!isExpanded)} // <-- Mengubah state internal mandiri secara langsung
+            onPress={() => setIsExpanded(!isExpanded)}
             style={styles.toggleButton}
             activeOpacity={0.7}
           >
@@ -56,7 +63,7 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
         )}
 
         <View style={[styles.cardContainer, isMatched && styles.matchedHighlight]}>
-          <MemberCard member={node} onPress={handleCardPress} />
+          <MemberCard member={node} level={level} onPress={handleCardPress} />
         </View>
       </View>
 
@@ -71,6 +78,7 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
               node={child} 
               level={level + 1} 
               searchQuery={searchQuery}
+              expandTrigger={expandTrigger}
             />
           ))}
         </View>
@@ -95,12 +103,21 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
             {selectedMember && (
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.avatarRow}>
-                  <View style={[
-                    styles.avatarCircle, 
-                    { backgroundColor: selectedMember.gender === 'F' ? '#fff0f6' : '#e6f7ff' }
-                  ]}>
-                    <BookOpen color={selectedMember.gender === 'F' ? colors.female : colors.male} size={28} />
-                  </View>
+                  {selectedMember.photo_url ? (
+                    // JIKA ADA FOTO: Tampilkan foto asli dari Supabase Storage
+                    <Image 
+                      source={{ uri: selectedMember.photo_url }} 
+                      style={styles.avatarImage} 
+                    />
+                  ) : (
+                    // JIKA TIDAK ADA FOTO: Tampilkan ikon fallback standar berdasarkan gender
+                    <View style={[
+                      styles.avatarCircle, 
+                      { backgroundColor: selectedMember.gender === 'F' ? '#fff0f6' : '#e6f7ff' }
+                    ]}>
+                      <BookOpen color={selectedMember.gender === 'F' ? colors.female : colors.male} size={28} />
+                    </View>
+                  )}
                   <AppText variant="bodyStrong" style={styles.modalName}>{selectedMember.name}</AppText>
                   
                   <View style={[
@@ -218,6 +235,14 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: 50,
     marginBottom: spacing.sm,
+  },
+  avatarImage: {
+    width: 90,
+    height: 90,
+    borderRadius: 45, // Membuat foto melingkar sempurna
+    marginBottom: spacing.sm,
+    borderWidth: 3,
+    borderColor: '#f0f5ff', // Frame estetik tipis di sekeliling foto
   },
   modalName: {
     fontSize: 20,
