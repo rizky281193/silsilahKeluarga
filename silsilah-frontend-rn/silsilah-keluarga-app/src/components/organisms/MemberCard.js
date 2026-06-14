@@ -1,15 +1,20 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import AppText from '../atoms/AppText';
 import { colors, radius, spacing } from '../../theme/tokens';
 
-export default function MemberCard({ member }) {
+export default function MemberCard({ member, onPress }) {
   const spouseNames = member.spouses && member.spouses.length > 0
     ? member.spouses.map(s => s.name).join(', ')
     : null;
 
   return (
-    <View style={[styles.card, member.gender === 'F' ? styles.borderFemale : styles.borderMale]}>
+    // PERBAIKAN: Membungkus kartu dengan TouchableOpacity agar bisa diklik secara interaktif
+    <TouchableOpacity 
+      activeOpacity={0.7}
+      onPress={() => onPress && onPress(member)}
+      style={[styles.card, member.gender === 'F' ? styles.borderFemale : styles.borderMale]}
+    >
       <View style={styles.headerRow}>
         <AppText variant="bodyStrong" style={styles.mainName}>
           {member.name}
@@ -30,12 +35,11 @@ export default function MemberCard({ member }) {
         </View>
       )}
 
-      {member.biografi && (
-        <AppText variant="subtitle" style={styles.biografi}>
-          {member.biografi}
-        </AppText>
-      )}
-    </View>
+      {/* Catatan kecil indikator klip di pojok bawah kartu */}
+      <View style={styles.footerRow}>
+        <AppText variant="caption" style={styles.hintText}>ℹ️ Ketuk untuk detail biografi</AppText>
+      </View>
+    </TouchableOpacity>
   );
 }
 
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
   card: {
     padding: spacing.md,
     backgroundColor: colors.surface,
-    borderRadius: radius.lg, // Diperlebar agar membulat premium seperti kartu Beranda
+    borderRadius: radius.lg,
     borderLeftWidth: 5,
     marginVertical: spacing.xs,
     marginHorizontal: spacing.sm,
@@ -88,10 +92,16 @@ const styles = StyleSheet.create({
   spouseNamesText: {
     color: colors.textMain,
   },
-  biografi: {
-    fontSize: 12,
-    color: colors.textLight,
+  footerRow: {
     marginTop: spacing.sm,
-    fontStyle: 'italic',
+    alignItems: 'flex-end',
+    borderTopWidth: 1,
+    borderTopColor: '#f5f5f5',
+    paddingTop: 4,
   },
+  hintText: {
+    fontSize: 10,
+    color: '#bcbcbf',
+    fontStyle: 'italic',
+  }
 });

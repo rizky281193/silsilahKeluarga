@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Modal, ScrollView } from 'react-native';
 import MemberCard from '../organisms/MemberCard';
 import AppText from '../atoms/AppText';
-import { colors, spacing } from '../../theme/tokens';
+import { colors, spacing, radius } from '../../theme/tokens';
+import { X, BookOpen, ShieldAlert } from 'lucide-react-native';
 
 export default function TreeItem({ node, level = 0, searchQuery = '' }) {
-  const [isExpanded, setIsExpanded] = useState(true);
-  
+  // KUNCI PERBAIKAN: Gunakan kembali state internal mandiri untuk mengontrol buka-tutup cabang
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const hasChildren = node.children && node.children.length > 0;
   const indentSize = level * spacing.md;
 
-  // FUNGSI CERDAS: Jika ada query pencarian, cek apakah ada anak/cucu di bawahnya yang cocok
+  // Fungsi cerdas auto-expand jika anak di bawahnya cocok dengan teks search pencarian
   const hasMatchingChild = (item, query) => {
     if (!query) return false;
     if (!item.children) return false;
@@ -20,25 +24,26 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
     );
   };
 
-  // Efek otomatis membuka tab jika keturunan di bawahnya cocok dengan teks pencarian
   useEffect(() => {
     if (searchQuery && hasMatchingChild(node, searchQuery)) {
       setIsExpanded(true);
     }
   }, [searchQuery, node]);
 
-  // Cek apakah kartu ini sendiri cocok dengan pencarian (untuk efek highlight visual jika mau)
   const isMatched = searchQuery && node.name.toLowerCase().includes(searchQuery.toLowerCase());
 
+  const handleCardPress = (member) => {
+    setSelectedMember(member);
+    setIsModalVisible(true);
+  };
+
   return (
-    <View style={[styles.container, isMatched && styles.matchedHighlight]}>
-      
+    <View style={styles.container}>
       {/* BARIS UTAMA */}
       <View style={[styles.row, { paddingLeft: indentSize }]}>
-        
         {hasChildren ? (
           <TouchableOpacity 
-            onPress={() => setIsExpanded(!isExpanded)} 
+            onPress={() => setIsExpanded(!isExpanded)} // <-- Mengubah state internal mandiri secara langsung
             style={styles.toggleButton}
             activeOpacity={0.7}
           >
@@ -50,10 +55,9 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
           <View style={styles.spacer} />
         )}
 
-        <View style={styles.cardContainer}>
-          <MemberCard member={node} />
+        <View style={[styles.cardContainer, isMatched && styles.matchedHighlight]}>
+          <MemberCard member={node} onPress={handleCardPress} />
         </View>
-        
       </View>
 
       {/* REKURSIF ANAK */}
@@ -66,12 +70,72 @@ export default function TreeItem({ node, level = 0, searchQuery = '' }) {
               key={child.id} 
               node={child} 
               level={level + 1} 
-              searchQuery={searchQuery} // Teruskan kata kunci ke level bawah
+              searchQuery={searchQuery}
             />
           ))}
         </View>
       )}
 
+      {/* POP-UP MODAL BIOGRAFI EKSKLUSIF */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeButton} 
+              onPress={() => setIsModalVisible(false)}
+            >
+              <X color="#8a8a8e" size={20} />
+            </TouchableOpacity>
+
+            {selectedMember && (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.avatarRow}>
+                  <View style={[
+                    styles.avatarCircle, 
+                    { backgroundColor: selectedMember.gender === 'F' ? '#fff0f6' : '#e6f7ff' }
+                  ]}>
+                    <BookOpen color={selectedMember.gender === 'F' ? colors.female : colors.male} size={28} />
+                  </View>
+                  <AppText variant="bodyStrong" style={styles.modalName}>{selectedMember.name}</AppText>
+                  
+                  <View style={[
+                    styles.statusBadge, 
+                    selectedMember.is_alive ? { backgroundColor: colors.aliveBg } : { backgroundColor: colors.deadBg }
+                  ]}>
+                    <AppText variant="caption" style={{ color: selectedMember.is_alive ? colors.aliveText : colors.deadText, fontWeight: '700' }}>
+                      {selectedMember.is_alive ? 'HIDUP' : 'WAFAT'}
+                    </AppText>
+                  </View>
+                </View>
+
+                <View style={styles.modalDivider} />
+
+                <AppText variant="bodyStrong" style={styles.biografiTitle}>Riwayat & Biografi</AppText>
+                
+                <View style={styles.biografiBox}>
+                  <AppText variant="body" style={styles.biografiText}>
+                    {selectedMember.biografi && selectedMember.biografi.trim() !== ""
+                      ? selectedMember.biografi
+                      : "Belum ada catatan riwayat hidup mendalam untuk anggota keluarga ini. Data biografi dapat diperbarui berkala oleh pengurus silsilah Bani Moenandar."}
+                  </AppText>
+                </View>
+
+                <View style={styles.metaRow}>
+                  <ShieldAlert size={14} color="#8a8a8e" style={{ marginRight: 6 }} />
+                  <AppText variant="caption" style={styles.metaText}>
+                    ID Sistem: {selectedMember.id} • Jalur Keturunan: {selectedMember.gender === 'M' ? 'Garis Bapak' : 'Garis Ibu'}
+                  </AppText>
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -80,9 +144,6 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     borderRadius: 8,
-  },
-  matchedHighlight: {
-    backgroundColor: colors.highlight, // Menggunakan warna sorotan dari token global
   },
   row: {
     flexDirection: 'row',
@@ -98,13 +159,16 @@ const styles = StyleSheet.create({
   },
   toggleText: {
     fontSize: 14,
-    color: colors.textLight,
+    color: '#8a8a8e',
   },
   spacer: {
     width: 30,
   },
   cardContainer: {
     flex: 1,
+  },
+  matchedHighlight: {
+    backgroundColor: colors.highlight,
   },
   childrenList: {
     position: 'relative',
@@ -115,6 +179,88 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 20,
     width: 1,
-    backgroundColor: colors.divider,
+    backgroundColor: '#e5e5ea',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 44, 140, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modalContent: {
+    backgroundColor: colors.surface,
+    width: '100%',
+    maxHeight: '75%',
+    borderRadius: 24,
+    padding: spacing.lg,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 10,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+    zIndex: 10,
+    backgroundColor: '#f2f2f7',
+    padding: 6,
+    borderRadius: 50,
+  },
+  avatarRow: {
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  avatarCircle: {
+    padding: spacing.md,
+    borderRadius: 50,
+    marginBottom: spacing.sm,
+  },
+  modalName: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.primaryDeep,
+    textAlign: 'center',
+  },
+  statusBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 4,
+    borderRadius: 50,
+    marginTop: spacing.xs,
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: '#f0f5ff',
+    marginVertical: spacing.md,
+  },
+  biografiTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.textMain,
+    marginBottom: spacing.xs,
+  },
+  biografiBox: {
+    backgroundColor: colors.background,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    minHeight: 100,
+  },
+  biografiText: {
+    fontSize: 14,
+    color: '#3a3a3c',
+    lineHeight: 22,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.md,
+    justifyContent: 'center',
+  },
+  metaText: {
+    fontSize: 11,
+    color: '#8a8a8e',
   },
 });
