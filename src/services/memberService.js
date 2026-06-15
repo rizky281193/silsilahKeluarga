@@ -35,3 +35,13 @@ export async function getMembers() {
 
   return data ?? [];
 }
+
+export async function insertMember(memberData) {
+  const { data, error } = await supabase
+    .from('members') // <-- Pastikan nama tabel di Supabase Anda adalah 'members'
+    .insert([memberData])
+    .select();
+
+  if (error) throw error;
+  return data;
+}

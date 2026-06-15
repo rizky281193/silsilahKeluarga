@@ -1,25 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createClient } from '@supabase/supabase-js'; 
 
-// Mengambil variabel lingkungan dari file .env
-const rawSupabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+// Mengambil variabel URL dan KEY dari pengaturan cloud Expo / .env Anda
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-let supabaseConfigError = null;
-
-if (!rawSupabaseUrl) {
-	supabaseConfigError = 'EXPO_PUBLIC_SUPABASE_URL belum diisi pada file .env';
-} else if (!supabaseAnonKey) {
-	supabaseConfigError = 'EXPO_PUBLIC_SUPABASE_ANON_KEY belum diisi pada file .env';
-}
-
-let supabase = null;
-
-if (!supabaseConfigError) {
-	// Supabase JS membutuhkan base URL project (tanpa /rest/v1)
-	const supabaseUrl = rawSupabaseUrl.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
-	supabase = createClient(supabaseUrl, supabaseAnonKey);
-} else {
-	console.error('Supabase config error:', supabaseConfigError);
-}
-
-export { supabase, supabaseConfigError };
+// Membuat koneksi resmi ke Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: AsyncStorage,    // <--- KUNCI UTAMA: Menyuruh Supabase menyimpan sesi login di memori HP
+    autoRefreshToken: true,   // Otomatis memperbarui token login jika sudah kedaluwarsa
+    persistSession: true,     // Menjaga sesi login tetap aktif meskipun aplikasi ditutup
+    detectSessionInUrl: false,
+  },
+});

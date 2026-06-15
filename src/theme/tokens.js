@@ -17,8 +17,8 @@ export const colors = {
   border: '#f0f5ff',
 
   // Identitas Gender & Status (Dibuat versi Pastel Premium)
-  male: '#1890ff',        // Soft Royal Blue untuk Laki-laki
-  female: '#ff4d4f',      // Soft Crimson/Rose untuk Perempuan
+  male: '#1890ff',        // Soft Royal Blue untuk M
+  female: '#ff4d4f',      // Soft Crimson/Rose untuk F
   aliveBg: '#e6f7ff',     // Latar belakang badge hidup
   aliveText: '#0050b3',   // Teks badge hidup
   deadBg: '#f5f5f5',      // Latar belakang badge wafat
